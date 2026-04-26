@@ -1,0 +1,107 @@
+STM32CubeIDE Configuration
+Step 1 — Create New Project
+
+Open STM32CubeIDE → File → New → STM32 Project
+In the board selector, search NUCLEO-F411RE
+Select it → Next
+Give it a name (e.g. Radar) → Finish
+When asked "Initialize peripherals in default mode?" → click Yes
+
+
+Step 2 — CubeMX Pinout (IOC file)
+The .ioc file opens automatically. Configure each peripheral:
+
+🔵 GPIO — TRIG Pin (PB6)
+
+Click pin PB6 on the chip diagram
+Set to GPIO_Output
+Right-click → Enter User Label → type TRIG
+
+
+🔵 GPIO — ECHO Pin (PA0)
+
+Click pin PA0
+Set to GPIO_Input
+Right-click → Enter User Label → type ECHO
+
+
+We use PA0 for echo because it's clean and 5V tolerant after the voltage divider. Don't forget the divider from the wiring step.
+
+
+🟡 TIM1 — PWM for Servo (PA8 = D7 on Nucleo)
+
+⚠️ Change your servo signal wire to D7 (PA8) for CubeIDE — PA6 is for STM32duino only.
+
+
+Left panel → Timers → TIM1
+Set Clock Source → Internal Clock
+Set Channel 1 → PWM Generation CH1
+Go to Configuration tab → Parameter Settings:
+
+ParameterValueWhyPrescaler (PSC)8384MHz ÷ 84 = 1MHz (1µs per tick)Counter Period (ARR)1999920ms period = 50Hz (servo standard)Pulse (CCR1)1500Neutral position (1.5ms)Auto-reload preloadEnableKeeps PWM smooth
+
+🟢 DWT — Microsecond Timing (for TRIG pulse)
+No CubeMX config needed — enabled in code directly.
+
+🔴 USART2 — Serial Output to PC
+USART2 is already enabled by default on Nucleo (it goes through ST-Link to your PC as a COM port).
+Just verify:
+
+Left panel → Connectivity → USART2
+Mode: Asynchronous
+Configuration tab → Baud Rate: 9600
+Pins should show PA2 (TX) and PA3 (RX) — leave them as is
+
+
+Step 3 — Clock Configuration
+
+Click Clock Configuration tab at the top
+Set HCLK to 84 MHz (max for F411RE)
+CubeIDE will auto-solve the PLL settings — click Yes if it asks to auto-configure
+
+
+Step 4 — Project Settings
+
+Click Project Manager tab
+Under Code Generator section, check:
+
+✅ Generate peripheral initialization as a pair of .c/.h files
+✅ Keep user code when re-generating
+
+
+
+
+Step 5 — Generate Code
+Click the ⚙️ Generate Code button (or Ctrl+S on the .ioc file) → click Yes when prompted to open the C/C++ perspective.
+
+Step 6 — Add the Radar Code
+In main.c, paste code in the marked sections:
+c/* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <string.h>
+/* USER CODE END Includes */
+c/* USER CODE BEGIN 2 */
+DWT_Init();                          // Start microsecond timer
+HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);  // Start servo PWM
+HAL_Delay(1000);                     // Let servo settle
+/* USER CODE END 2 */
+c/* USER CODE BEGIN 3 */
+radarTask();                         // Put your radar sweep here
+/* USER CODE END 3 */
+Then paste the radarTask(), calculateDistance(), setServoAngle(), DWT_Init(), and DWT_Delay_us() functions from the HAL code I gave earlier into:
+c/* USER CODE BEGIN 4 */
+// paste all functions here
+/* USER CODE END 4 */
+
+Step 7 — Build & Flash
+
+Project → Build All (or hammer icon 🔨)
+Make sure 0 errors
+Run → Debug (or bug icon 🐛) → this flashes via ST-Link automatically
+Open Window → Show View → Console to confirm it's running
+
+
+Summary of What You Configured
+PeripheralPurposePinGPIO OutputTRIG pulsePB6GPIO InputECHO readPA0TIM1 CH1 PWMServo signal 50HzPA8 (D7)USART2Serial to PC via ST-LinkPA2/PA3DWTMicrosecond delays(internal)
+
+Once you build with 0 errors, let me know and we'll verify the serial output matches what your Processing radar sketch expects.
