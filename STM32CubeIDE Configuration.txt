@@ -11,14 +11,14 @@ When asked "Initialize peripherals in default mode?" → click Yes
 Step 2 — CubeMX Pinout (IOC file)
 The .ioc file opens automatically. Configure each peripheral:
 
-🔵 GPIO — TRIG Pin (PB6)
+GPIO — TRIG Pin (PB6)
 
 Click pin PB6 on the chip diagram
 Set to GPIO_Output
 Right-click → Enter User Label → type TRIG
 
 
-🔵 GPIO — ECHO Pin (PA0)
+GPIO — ECHO Pin (PA0)
 
 Click pin PA0
 Set to GPIO_Input
@@ -28,9 +28,9 @@ Right-click → Enter User Label → type ECHO
 We use PA0 for echo because it's clean and 5V tolerant after the voltage divider. Don't forget the divider from the wiring step.
 
 
-🟡 TIM1 — PWM for Servo (PA8 = D7 on Nucleo)
+ TIM1 — PWM for Servo (PA8 = D7 on Nucleo)
 
-⚠️ Change your servo signal wire to D7 (PA8) for CubeIDE — PA6 is for STM32duino only.
+ Change your servo signal wire to D7 (PA8) for CubeIDE — PA6 is for STM32duino only.
 
 
 Left panel → Timers → TIM1
@@ -40,10 +40,10 @@ Go to Configuration tab → Parameter Settings:
 
 ParameterValueWhyPrescaler (PSC)8384MHz ÷ 84 = 1MHz (1µs per tick)Counter Period (ARR)1999920ms period = 50Hz (servo standard)Pulse (CCR1)1500Neutral position (1.5ms)Auto-reload preloadEnableKeeps PWM smooth
 
-🟢 DWT — Microsecond Timing (for TRIG pulse)
+ DWT — Microsecond Timing (for TRIG pulse)
 No CubeMX config needed — enabled in code directly.
 
-🔴 USART2 — Serial Output to PC
+ USART2 — Serial Output to PC
 USART2 is already enabled by default on Nucleo (it goes through ST-Link to your PC as a COM port).
 Just verify:
 
@@ -65,8 +65,8 @@ Step 4 — Project Settings
 Click Project Manager tab
 Under Code Generator section, check:
 
-✅ Generate peripheral initialization as a pair of .c/.h files
-✅ Keep user code when re-generating
+ Generate peripheral initialization as a pair of .c/.h files
+ Keep user code when re-generating
 
 
 
@@ -95,9 +95,9 @@ c/* USER CODE BEGIN 4 */
 
 Step 7 — Build & Flash
 
-Project → Build All (or hammer icon 🔨)
+Project → Build All (or hammer icon )
 Make sure 0 errors
-Run → Debug (or bug icon 🐛) → this flashes via ST-Link automatically
+Run → Debug (or bug icon ) → this flashes via ST-Link automatically
 Open Window → Show View → Console to confirm it's running
 
 
